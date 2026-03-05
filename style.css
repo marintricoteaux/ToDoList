@@ -38,17 +38,23 @@ header, footer {
     width: 400px;
     min-height: 400px;
     padding: 10px;
-    border-radius: 5px;
+    border-radius: 7px;
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.3);
+
+    display: flex;
+    flex-direction: column;
 }
 
-/* Ce qui suit est le style du boutton et également quand l'U clique dessus */
+#mainBox * {
+    border-radius: 5px;
+    border: 0;
+    padding: 10px;
+    margin: 5px;
+}
 
 button {
     background-color: rgb(55, 35, 150);
     color: white;
-    border-radius: 5px;
-    border: 0;
-    padding: 10px;
 }
 
 button:hover {
