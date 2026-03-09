@@ -1,135 +1,116 @@
 /*
-Logique du site de to-do list
+Logique du site de to-do list : 
+Lorsqu'on ajoure une tâche :
+- On crée la tâche en javascript en lui attribuant un index.
+- On affiche à l'aide d'une fonction la tâche sous forme d'HTML
 */
 
 let mainBox = document.getElementById("mainBox");
-let btnAddTask = document.getElementById("addTaskButton");
-let indexTaskCount = 0;
+let index = 0;
+let tasks = [];
 
-// Ajout d'une tâche grâce au bouton "Add a task"
-btnAddTask.addEventListener("click", () => {
-    addTaskZone(indexTaskCount);
-    indexTaskCount++;
-});
-
-// Confirmation de la tache en cours de création à l'aide du bouton check
+// Lorsqu'on clicke sur la mainBox :
 mainBox.addEventListener("click", (event) => {
-    if (event.target.closest(".checkButton")) {
-        confirmTask(+event.target.closest(".checkButton").dataset.index);
+    // Ajout d'une tâche
+    if (event.target.closest("#addTaskBtn")) {
+        addTask(index);
+        renderTask(tasks[index]);
+        index++;
     }
-});
-// Confirmation de la tache en cours de création à l'aide de la touche "enter"
-document.addEventListener("keydown", (event) => {
-    if (document.activeElement.tagName === "INPUT") {
-        if (event.key === "Enter") {
-            confirmTask(+document.activeElement.dataset.index);
-        }
+    // Confirmation d'une tâche 
+    else if (event.target.closest(".checkBtn")) {
+        console.log("confirm");
+        let taskZone = event.target.closest(".taskZone");
+        tasks[taskZone.index].editing = false;
+        renderTask(tasks[taskZone.index]);
     }
 });
-
-// Supression de la tache en cours de création à l'aide du bouton croix
-mainBox.addEventListener("click", (event) => {
-    if (event.target.closest(".crossButton")) {
-        suppTask(+event.target.closest(".crossButton").dataset.index);
-    }
-});
-
-// Modification de la tâche après création grâce au bouton editTask
-mainBox.addEventListener("click", (event) => {
-    if (event.target.closest(".editTask")) {
-        // On vérifie un potentiel précédent textSaved
-        let currentIndex = +event.target.closest(".editTask").dataset.index;
-        let currentTask = document.getElementById(`taskZone${currentIndex}`)
-        let textSaved = currentTask.innerText.trim(); // Supprime les espaces inutiles avant et après la chaîne de caractère
-        //On vérifie une potentielle précédente checkbox checked
-        let wasChecked = document.getElementById(`checkboxTask${currentIndex}`).checked;
-
-        editTask(+event.target.closest(".editTask").dataset.index, textSaved, wasChecked);
-    }
-})
-// Supression de la tâche après création grâce au bouton trashButton
-mainBox.addEventListener("click", (event) => {
-    if (event.target.closest(".trashButton")) {
-        suppTask(+event.target.closest(".trashButton").dataset.index);
-    }
-})
-
 
 /*
 Déclaration des fonctions
 */
 
-// Cette fonction ajoute une zone de tâche, elle passe la tâche en mode "edit"
-function addTaskZone(indexTask) {
-    let stringHTML = `<div id="taskZone${indexTask}" class="taskZoneClass" data-index="${indexTask}" data-wasChecked="false"></div>`;
-
-    mainBox.insertAdjacentHTML("beforeend", stringHTML)
-    editTask(indexTask);
+// Cette fonction crée la tâche sous forme d'un objet avec
+// les éléments qui la compose et son mode (editing/nEditing)
+function addTask(index) {
+    let task = {
+        index: index,
+        text: "",
+        done: false,
+        editing: true,
+    };
+    tasks.push(task);
 }
 
-// Cette fonction confirme la tâche en récupérant la valeur de l'input et en placant les boutons appropriés
-function confirmTask(indexTask) {
-    let currentTask = document.getElementById(`taskZone${indexTask}`);
-    let inputTask = (document.getElementById(`inputTask${indexTask}`));
-    
-    let stringHTML = (
-        `<input type="checkbox" id="checkboxTask${indexTask}"/>
-        ${inputTask.value}
-        <button id="editTask${indexTask}" class="editTask" data-index="${indexTask}">
-            <i class="fa-solid fa-pen"></i>
-        </button>
-        <button id="trashButton${indexTask}" class="trashButton" data-index="${indexTask}">
-            <i class="fa-solid fa-trash-can"></i>
-        </button>`
-    );
+// La fonction s'occupe d'afficher en HTML la tâche en question,
+// soit en mode editing, soit normalement.
+function renderTask(task) {
+    // Déclaration de la zone de la tâche
+    let taskZone = document.createElement("div");
+    taskZone.id = `taskZone${task.index}`;
+    taskZone.classList = "taskZone";
+    taskZone.index = task.index;
 
-    if (inputTask.value !== "") {
-        currentTask.innerHTML = stringHTML;
+    // En fonction du mode, on a :
+    if (task.editing) {
+        // Création des éléments
+        let input = document.createElement("input");
+        input.type = "text";
+        input.id = `input${task.index}`;
+        input.class = "input";
+        input.placeholder = "Name yout task";
 
-        // On check la box si elle l'était avant modification
-        let wasChecked = document.getElementById(`taskZone${indexTask}`).dataset.wasChecked;
-        if (wasChecked === "true") {
-            let checkboxTask = document.getElementById(`checkboxTask${indexTask}`);
-            checkboxTask.checked = true;
-        }
+        let checkBtn = document.createElement("button");
+        checkBtn.id = `checkBtn${task.index}`;
+        checkBtn.classList = "checkBtn";
+
+        let checkIcon = document.createElement("i");
+        checkIcon.classList = "fa-solid fa-check";
+
+        let crossBtn = document.createElement("button");
+        crossBtn.id = `crossBtn${task.index}`;
+        crossBtn.classList = "crossBtn";
+
+        let crossIcon = document.createElement("i");
+        crossIcon.classList = "fa-solid fa-xmark";
+
+        // Mise en place de la DOM
+        checkBtn.appendChild(checkIcon);
+        crossBtn.appendChild(crossIcon);
+
+        taskZone.appendChild(input);
+        taskZone.appendChild(checkBtn);
+        taskZone.appendChild(crossBtn);
     } else {
-        inputTask.classList.add("errorMessage");
-    }
-}
+        // Création des éléments
+        let checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.id = `checkbox${task.index}`;
+        checkbox.classList = "checkbox";
 
-// Cette fonction suprrime completement la tâche, ainsi que sa zone
-function suppTask(indexTask) {
-    let taskToSupp = document.getElementById(`taskZone${indexTask}`);
+        let editBtn = document.createElement("button");
+        editBtn.id = `editBtn${task.index}`;
+        editBtn.clasList = "editBtn";
 
-    taskToSupp.remove();
-}
+        let editIcon = document.createElement("i");
+        editIcon.classList = "fa-solid fa-pen";
 
-// Cette fonction permet de modifier une tâche
-function editTask(indexTask, inputSaved="", wasChecked = false) {
-    let stringHTML = (
-        `<input type="text" id="inputTask${indexTask}" class="inputTask" name="inputTask" placeholder="Name your task" data-index="${indexTask}"/>
-        <button id="check${indexTask}" class="checkButton" data-index="${indexTask}">
-            <i class="fa-solid fa-check"></i>
-        </button>
-        <button id="cross${indexTask}" class="crossButton" data-index="${indexTask}">
-            <i class="fa-solid fa-xmark"></i>
-        </button>`
-    );
-    let currentTask = document.getElementById(`taskZone${indexTask}`);
-    
-    //On vérifie au préalable que la tâche n'était pas checked
-    if (wasChecked) {
-        currentTask.dataset.wasChecked = true;
-    } else {
-        currentTask.dataset.wasChecked = false;
+        let trashBtn = document.createElement("button");
+        trashBtn.id = `trashBtn${task.index}`;
+        trashBtn.classList = "trashBtn";
+
+        let trashIcon = document.createElement("i");
+        trashIcon.classList = "fa-solid fa-trash-can";
+
+        // Mise en place de la DOM
+        editBtn.appendChild(editIcon);
+        trashBtn.appendChild(trashIcon);
+
+        taskZone.appendChild(checkbox);
+        taskZone.appendChild(editBtn);
+        taskZone.appendChild(trashBtn);
     }
 
-    // On passe en mode "edit"
-    currentTask.innerHTML = stringHTML;
-
-    // On vérifie qu'il n'y ai pas déjà un input rentré
-    if (inputSaved !== "") {
-        let currentInputTask = document.getElementById(`inputTask${indexTask}`);
-        currentInputTask.value = inputSaved;
-    }
+    // On ajoute enfin la zone de tâche à la mainBox
+    mainBox.replaceChildren(taskZone);
 }
