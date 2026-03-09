@@ -94,7 +94,6 @@ function confirmTask(indexTask) {
         }
     } else {
         inputTask.classList.add("errorMessage");
-        inputTask.placeholder = "The task can't be empty";
     }
 }
 
