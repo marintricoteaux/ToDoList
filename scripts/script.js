@@ -19,9 +19,20 @@ mainBox.addEventListener("click", (event) => {
     }
     // Confirmation d'une tâche 
     else if (event.target.closest(".checkBtn")) {
-        console.log("confirm");
         let taskZone = event.target.closest(".taskZone");
         tasks[taskZone.index].editing = false;
+        renderTask(tasks[taskZone.index]);
+    }
+    // Supression d'une tâche : editing ou non
+    else if (event.target.closest(".crossBtn") || event.target.closest(".trashBtn")) {
+        let taskZone = event.target.closest(".taskZone");
+        suppTask(tasks[taskZone.index]);
+    }
+    // Modification d'une tâche
+    else if (event.target.closest(".editBtn")) {
+        console.log("edit");
+        let taskZone = event.target.closest(".taskZone");
+        tasks[taskZone.index].editing = true;
         renderTask(tasks[taskZone.index]);
     }
 });
@@ -40,6 +51,16 @@ function addTask(index) {
         editing: true,
     };
     tasks.push(task);
+}
+
+// Lorque le bouton cross ou trash est cliqué, on supprime la tâche
+function suppTask(task) {
+    // Supression en mémoire
+    tasks[task] = null;
+
+    // Supression dans la DOM
+    let taskZone = document.getElementById(`taskZone${task.index}`)
+    taskZone.remove();
 }
 
 // La fonction s'occupe d'afficher en HTML la tâche en question,
@@ -88,9 +109,14 @@ function renderTask(task) {
         checkbox.id = `checkbox${task.index}`;
         checkbox.classList = "checkbox";
 
+        // Ajout de la valeur de l'input s'il existe
+        task.text = document.getElementById(`input${task.index}`).value;
+        let textSpan = document.createElement("span");
+        textSpan.innerText = task.text;
+
         let editBtn = document.createElement("button");
         editBtn.id = `editBtn${task.index}`;
-        editBtn.clasList = "editBtn";
+        editBtn.classList = "editBtn";
 
         let editIcon = document.createElement("i");
         editIcon.classList = "fa-solid fa-pen";
@@ -107,10 +133,18 @@ function renderTask(task) {
         trashBtn.appendChild(trashIcon);
 
         taskZone.appendChild(checkbox);
+
+        taskZone.appendChild(textSpan);
+
         taskZone.appendChild(editBtn);
         taskZone.appendChild(trashBtn);
     }
 
     // On ajoute enfin la zone de tâche à la mainBox
-    mainBox.replaceChildren(taskZone);
+    let taskToRender = document.getElementById(`taskZone${task.index}`)
+    if (taskToRender) {
+        taskToRender.replaceWith(taskZone);
+    } else {
+        mainBox.appendChild(taskZone);
+    }
 }
