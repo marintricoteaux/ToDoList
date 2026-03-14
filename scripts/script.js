@@ -28,7 +28,7 @@ function suppTask(task) {
 // soit en mode editing, soit normalement.
 function renderTask(task) {
     // Déclaration de la zone de la tâche
-    let taskZone = document.createElement("div");
+    let taskZone = document.createElement("li");
     taskZone.id = `taskZone${task.index}`;
     taskZone.classList = "taskZone";
     taskZone.index = task.index;
@@ -106,12 +106,13 @@ function renderTask(task) {
         taskZone.appendChild(trashBtn);
     }
 
-    // On ajoute enfin la zone de tâche à la mainBox
+    // On ajoute enfin la zone de tâche à la taskList
     let taskToRender = document.getElementById(`taskZone${task.index}`)
     if (taskToRender) {
         taskToRender.replaceWith(taskZone);
     } else {
-        mainBox.appendChild(taskZone);
+        let taskList = document.getElementById("taskList");
+        taskList.appendChild(taskZone);
     }
 }
 
