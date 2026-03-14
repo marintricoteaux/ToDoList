@@ -1,44 +1,5 @@
 /*
-Logique du site de to-do list : 
-Lorsqu'on ajoure une tâche :
-- On crée la tâche en javascript en lui attribuant un index.
-- On affiche à l'aide d'une fonction la tâche sous forme d'HTML
-*/
-
-let mainBox = document.getElementById("mainBox");
-let index = 0;
-let tasks = [];
-
-// Lorsqu'on clicke sur la mainBox :
-mainBox.addEventListener("click", (event) => {
-    // Ajout d'une tâche
-    if (event.target.closest("#addTaskBtn")) {
-        addTask(index);
-        renderTask(tasks[index]);
-        index++;
-    }
-    // Confirmation d'une tâche 
-    else if (event.target.closest(".checkBtn")) {
-        let taskZone = event.target.closest(".taskZone");
-        tasks[taskZone.index].editing = false;
-        renderTask(tasks[taskZone.index]);
-    }
-    // Supression d'une tâche : editing ou non
-    else if (event.target.closest(".crossBtn") || event.target.closest(".trashBtn")) {
-        let taskZone = event.target.closest(".taskZone");
-        suppTask(tasks[taskZone.index]);
-    }
-    // Modification d'une tâche
-    else if (event.target.closest(".editBtn")) {
-        console.log("edit");
-        let taskZone = event.target.closest(".taskZone");
-        tasks[taskZone.index].editing = true;
-        renderTask(tasks[taskZone.index]);
-    }
-});
-
-/*
-Déclaration des fonctions
+Déclaration des fonctions utile à main.js
 */
 
 // Cette fonction crée la tâche sous forme d'un objet avec
@@ -79,7 +40,7 @@ function renderTask(task) {
         input.type = "text";
         input.id = `input${task.index}`;
         input.class = "input";
-        input.placeholder = "Name yout task";
+        input.placeholder = "Name your task";
 
         let checkBtn = document.createElement("button");
         checkBtn.id = `checkBtn${task.index}`;
@@ -109,7 +70,7 @@ function renderTask(task) {
         checkbox.id = `checkbox${task.index}`;
         checkbox.classList = "checkbox";
 
-        // Ajout de la valeur de l'input s'il existe
+        // Ajout de la valeur de l'input (elle existe forcément)
         task.text = document.getElementById(`input${task.index}`).value;
         let textSpan = document.createElement("span");
         textSpan.innerText = task.text;
@@ -127,6 +88,11 @@ function renderTask(task) {
 
         let trashIcon = document.createElement("i");
         trashIcon.classList = "fa-solid fa-trash-can";
+
+        // On vérifie que, si elle existait, la tâche était checked
+        if (task.done) {
+            checkbox.checked = true;
+        }
 
         // Mise en place de la DOM
         editBtn.appendChild(editIcon);
@@ -146,5 +112,14 @@ function renderTask(task) {
         taskToRender.replaceWith(taskZone);
     } else {
         mainBox.appendChild(taskZone);
+    }
+}
+
+function isChecked(task) {
+    let checkbox = document.querySelector(`#checkbox${task.index}`);
+    if (checkbox.checked) {
+        task.done = true;
+    } else {
+        task.done = false;
     }
 }
